@@ -1,0 +1,25 @@
+name: Daily Org Issue Summary
+
+on: [push]
+
+#on:
+#  schedule:
+#    # runs every day at 5:00 UTC (1:00AM EST / Midnight CST)
+#    - cron: "0 5 * * *"
+
+jobs:
+  run-summary:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+      - run: pip install dinghy
+      - run: |
+          python -m dinghy dinghy_config/daily-tiledb-org-issues.yaml
+      - run: |
+          cp last-day-issues.html gh-pages/daily-issues/${{ github.event.repository.updated_at }}.html
+          git add gh-pages/daily-issues/*
+          git commit -m "Add ${{ github.event.repository.updated_at }}"
