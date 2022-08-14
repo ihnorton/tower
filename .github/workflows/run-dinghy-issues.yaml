@@ -4,22 +4,37 @@ on: [push]
 
 #on:
 #  schedule:
-#    # runs every day at 5:00 UTC (1:00AM EST / Midnight CST)
-#    - cron: "0 5 * * *"
+#    # runs every day at 12:00 UTC (8:00AM EST)
+#    - cron: "0 12 * * *"
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+  DATE_STRING: ${{ github.event.repository.updated_at }}
 
 jobs:
   run-summary:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
           cache: 'pip'
-      - run: pip install dinghy
+          cache-dependency-path: '**/requirements.txt'
+      - run: pip install -r dinghy_config/requirements.txt
       - run: |
-          python -m dinghy dinghy_config/daily-tiledb-org-issues.yaml
+          python -m dinghy dinghy_config/daily-tiledb-org-issues.yml
       - run: |
+          git config --global user.email "ihnorton@users.noreply.github.com"
+          git config --global user.name "Isaiah Norton"
           cp last-day-issues.html gh-pages/daily-issues/${{ github.event.repository.updated_at }}.html
           git add gh-pages/daily-issues/*
           git commit -m "Add ${{ github.event.repository.updated_at }}"
+          git push origin main
+
+      - name: Create Issue
+        uses: JasonEtco/create-an-issue@v2
+        with:
+          filename: .github/workflows/daily-summary-issue-template.md

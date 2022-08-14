@@ -1,9 +1,6 @@
 digests:
-  - digest: lastday.html
+  - digest: last-day-issues.html
     title: My projects last week
     since: 1 day
     items:
       - search: org:TileDB-Inc is:issue
-
-defaults:
-  ignore_users:
